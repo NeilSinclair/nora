@@ -1,0 +1,13 @@
+/__pycache__
+
+.env
+*.pyc
+*.pyo
+
+credentials.json
+token.json
+
+.DS_Store
+.idea/
+.vscode/
+
