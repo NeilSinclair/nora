@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 @pytest.fixture
 def tmp_data_dir(tmp_path: Path, monkeypatch):
     """Redirect all data paths to a temporary directory."""

@@ -84,6 +84,47 @@ INTENT_MODEL_MAP: dict[str, type[BaseIntentOutput]] = {
 
 
 # ---------------------------------------------------------------------------
+# Combined single-call output (router + intent parser merged)
+# ---------------------------------------------------------------------------
+
+class CombinedOutput(BaseModel):
+    """Single structured output that replaces the router + intent parser round-trips."""
+    # Routing
+    route: Route
+    date_from: str | None = None
+    date_to: str | None = None
+    extra_context: str | None = None
+
+    # Intent (shared across all routes)
+    intent: Literal["add", "edit", "delete", "search", "list", "chat"] = "chat"
+    llm_post_process: bool = False
+
+    # Notes + shopping lists
+    contextual_search_term: str | None = None
+    tags: list[str] = []
+    archived: bool = False
+    content: str | None = None
+
+    # Notes specific
+    note_id: int | None = None
+
+    # Shopping lists specific
+    list_id: int | None = None
+
+    # Reminders
+    reminder_id: str | None = None
+    reminder_text: str | None = None
+    remind_at: str | None = None
+
+    # Calendar
+    event_id: str | None = None
+    title: str | None = None
+    start: str | None = None
+    end: str | None = None
+    event_description: str | None = None
+
+
+# ---------------------------------------------------------------------------
 # Pipeline context — carries all data through the pipeline
 # ---------------------------------------------------------------------------
 

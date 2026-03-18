@@ -28,6 +28,12 @@ async def message(request: MessageRequest):
     history = await state.get_history(_WEB_USER_ID)
 
     router_output = await route(request.text, history)
+    intent_data = await parse_intent(
+        route=router_output.route,
+        raw_text=request.text,
+        history=history,
+        router_extra_context=router_output.extra_context,
+    )
 
     ctx = PipelineContext(
         user_id=_WEB_USER_ID,
@@ -37,15 +43,9 @@ async def message(request: MessageRequest):
         date_from=router_output.date_from,
         date_to=router_output.date_to,
         extra_context=router_output.extra_context,
+        intent=intent_data.intent,
+        intent_data=intent_data,
     )
-
-    ctx.intent_data = await parse_intent(
-        route=ctx.route,
-        raw_text=ctx.raw_text,
-        history=ctx.history,
-        router_extra_context=ctx.extra_context,
-    )
-    ctx.intent = ctx.intent_data.intent
 
     response_text = await dispatch(ctx)
     await state.append_turn(_WEB_USER_ID, request.text, response_text)

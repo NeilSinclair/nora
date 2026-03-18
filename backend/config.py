@@ -9,8 +9,8 @@ class Settings(BaseSettings):
 
     # OpenAI
     OPENAI_API_KEY: str
-    ROUTER_LLM: str = "gpt-5-nano"
-    INTENT_PARSER: str = "gpt-5-nano"
+    ROUTER_LLM: str = "gpt-4.1-nano"
+    INTENT_PARSER: str = "gpt-4.1-nano"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Telegram
@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     PASSWORD: str
     JWT_SECRET: str
 
-    # Google Calendar
-    GOOGLE_SERVICE_ACCOUNT_FILE: str
-    GOOGLE_CALENDAR_ID: str
+    # Google Calendar (optional — calendar features disabled if not set)
+    GOOGLE_SERVICE_ACCOUNT_FILE: str | None = None
+    GOOGLE_CALENDAR_ID: str | None = None
 
     # ChromaDB — persistent local vector store (no server required)
     CHROMA_PATH: Path = Path("data/chroma")

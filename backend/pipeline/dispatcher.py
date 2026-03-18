@@ -1,8 +1,13 @@
 """Dispatcher: routes a PipelineContext to the correct handler."""
 
+import logging
+import time
+
 from backend.config import settings
 from backend.pipeline.models import PipelineContext
 from backend.services.openai_client import responses_text
+
+logger = logging.getLogger(__name__)
 
 _LLM_POST_PROCESS_SYSTEM_PROMPT = """
 You are Nora, a friendly and concise AI assistant.
@@ -20,10 +25,17 @@ async def dispatch(ctx: PipelineContext) -> str:
     Returns:
       str: Final response text to send back to the user.
     """
+    t0 = time.perf_counter()
     raw_result = await _call_handler(ctx)
+    logger.info("[HANDLER:%s] completed in %.2fs result=%r", ctx.route,
+                time.perf_counter() - t0, raw_result[:80])
 
     if ctx.intent_data and ctx.intent_data.llm_post_process:
-        return await _llm_post_process(ctx.raw_text, raw_result, ctx.history)
+        logger.info("[LLM_POST_PROCESS] running...")
+        t1 = time.perf_counter()
+        result = await _llm_post_process(ctx.raw_text, raw_result, ctx.history)
+        logger.info("[LLM_POST_PROCESS] completed in %.2fs", time.perf_counter() - t1)
+        return result
 
     return raw_result
 

@@ -1,7 +1,6 @@
 """Singleton OpenAI client with helpers for the Responses API and Embeddings."""
 
-import json
-from typing import Any, Type, TypeVar
+from typing import Type, TypeVar
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel
@@ -27,34 +26,26 @@ async def responses_structured(
     output_model: Type[T],
     temperature: float = 0.0,
 ) -> T:
-    """Call the Responses API and parse the output into a Pydantic model.
+    """Call the Responses API and parse the JSON text output into a Pydantic model.
+
+    Uses plain text output rather than constrained decoding — avoids the latency
+    overhead of structured outputs while still getting reliable JSON from the model.
 
     Args:
       model (str): OpenAI model ID.
       messages (list[dict]): List of {"role": ..., "content": ...} dicts.
-      output_model (Type[T]): Pydantic model class to parse the JSON response into.
+      output_model (Type[T]): Pydantic model class to parse the response into.
       temperature (float): Sampling temperature.
 
     Returns:
       T: Parsed Pydantic model instance.
     """
-    schema = output_model.model_json_schema()
-    response = await get_client().responses.create(
+    response = await get_client().responses.parse(
         model=model,
         input=messages,
-        temperature=temperature,
-        text={
-            "format": {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": output_model.__name__,
-                    "schema": schema,
-                    "strict": True,
-                },
-            }
-        },
+        text_format=output_model,
     )
-    return output_model.model_validate_json(response.output_text)
+    return response.output_parsed
 
 
 async def responses_text(
